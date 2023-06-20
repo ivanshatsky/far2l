@@ -79,6 +79,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int DirectRT = 0;
 #endif
 
+char cwd[PATH_MAX+1];
+char *fcwd = NULL;
+bool SaveCWD = false;
+
 static void print_help(const char *self)
 {
 	printf("FAR2L - oldschool file manager, with built-in terminal and other usefullness'es\n"
@@ -324,6 +328,13 @@ static int MainProcess(FARString strEditViewArg, FARString strDestName1, FARStri
 		MoveRealCursor(0, 0);
 	}
 	CloseConsole();
+	if (SaveCWD && (getcwd(cwd, sizeof(cwd)) != NULL)) {
+		FILE *fp;
+		if ((fp = fopen(fcwd, "w"))) {
+			fprintf(fp, cwd);
+			fclose(fp);
+		}
+	}
 	return 0;
 }
 
@@ -486,6 +497,15 @@ int FarAppMain(int argc, char **argv)
 
 
 					break;
+				case L'P':
+
+					if (I+1<argc) {
+						I++;
+						fcwd = argv[I];
+						SaveCWD = true;
+					}
+
+ 					break;
 				case L'V':
 
 					if (I + 1 < argc) {
